@@ -1,0 +1,25 @@
+name: Main
+
+on: [push, pull_request]
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: 3.10
+          cache: "pip"
+      - name: "installation"
+        run: |
+          pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: "black"
+        run: black . --check -l 120 --diff --color
+
+      - name: "mypy"
+        run: mypy src --ignore-missing-imports
+
+      - name: "unit tests"
+        run: pytest tests
