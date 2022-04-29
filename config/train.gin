@@ -1,0 +1,7 @@
+# ==============================================================================
+#                    Multi-Language Classification Data Module
+# ==============================================================================
+
+MultiLanguageClassificationDataModule.languages = ("ru", "uk", "be", "kk", "az", "hy", "ka", "he", "en", "de")
+MultiLanguageClassificationDataModule.batch_size = 5
+MultiLanguageClassificationDataModule.val_batch_size = 10
