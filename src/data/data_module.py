@@ -24,12 +24,6 @@ class MultiLanguageClassificationDataModule(LightningDataModule):
         self._batch_size = batch_size
         self._val_batch_size = val_batch_size
 
-        # Init by setup
-        self._datasets: dict[str, MultiLanguageClassificationDataset] = {}
-        self._tokenizer: Tokenizer = None
-        self._bos_id: int = None
-        self._eos_id: int = None
-
     def setup(self, stage: Optional[str] = None):
         _logger.info(f"Downloading and opening 'wikiann' dataset for {', '.join(self._languages)}")
         full_data = {code: load_dataset("wikiann", code) for code in self._languages}
@@ -39,9 +33,10 @@ class MultiLanguageClassificationDataModule(LightningDataModule):
         self._bos_id = self._tokenizer.cls_token_id
         self._eos_id = self._tokenizer.sep_token_id
 
+        self._datasets = {}
         for split in ["train", "validation", "test"]:
             _logger.info(f"Initializing {split} dataset")
-            data = {code: full_data[code][split] for code in self._languages}
+            data = {code: full_data[code][split] for code in self._languages}  # type: ignore
             self._datasets[split] = MultiLanguageClassificationDataset(
                 data, self._tokenizer, self._bos_id, self._eos_id, is_train=(split == "train")
             )
@@ -53,7 +48,7 @@ class MultiLanguageClassificationDataModule(LightningDataModule):
         return DataLoader(self._datasets["validation"], batch_size=self._val_batch_size, collate_fn=self.collate_fn)
 
     def test_dataloader(self) -> EVAL_DATALOADERS:
-        return DataLoader(self._datasets["test"], batch_size=self._test_batch_size, collate_fn=self.collate_fn)
+        return DataLoader(self._datasets["test"], batch_size=self._val_batch_size, collate_fn=self.collate_fn)
 
     def collate_fn(self, samples: list[SAMPLE]) -> tuple[torch.Tensor, ...]:
         max_len = max(len(x[0]) for x in samples)

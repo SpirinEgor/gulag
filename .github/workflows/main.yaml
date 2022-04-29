@@ -19,7 +19,7 @@ jobs:
         run: black . --check -l 120 --diff --color
 
       - name: "mypy"
-        run: mypy src --ignore-missing-imports
+        run: mypy src --ignore-missing-imports --implicit-optional
 
       - name: "unit tests"
         run: PYTHONPATH="." pytest tests
