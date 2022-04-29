@@ -1,5 +1,5 @@
 # ==============================================================================
-#                       MultiLanguageClassificationDataset
+#                     Multi-Language Classification Dataset
 # ==============================================================================
 
 generate_example.min_langs = 1

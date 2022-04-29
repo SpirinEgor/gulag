@@ -1,16 +1,14 @@
 import logging
 import re
 from collections import defaultdict
-from random import randint, sample
 from string import punctuation, digits
 from typing import Iterator, Tuple
 
 import gin
 from numpy import ndarray, concatenate
-from numpy.random import permutation
+from numpy.random import default_rng
 from tokenizers import Tokenizer
 from torch.utils.data import IterableDataset
-from tqdm.auto import tqdm, trange
 
 _logger = logging.getLogger(__name__)
 
@@ -25,22 +23,21 @@ class MultiLanguageClassificationDataset(IterableDataset):
     def __init__(self, data: dict[str, list], tokenizer: Tokenizer, bos_id: int, eos_id: int, is_train: bool = True):
         self._langs = list(data.keys())
         self._n_langs = len(self._langs)
-        _logger.info(f"Using dataset with {', '.join(self._langs)} languages")
+        _logger.info(f"Initializing dataset with {', '.join(self._langs)} languages")
 
         self._data = defaultdict(lambda: [])
-        with tqdm(data.items(), desc="Dataset preparation") as pbar:
-            for lang, examples in pbar:
-                for i, full_example in enumerate(examples):
-                    sentence = " ".join(full_example["tokens"])
-                    sentence = re.sub(self._digit_or_punctuation, "", sentence)
-                    tokens = tokenizer.encode(sentence, add_special_tokens=False)
-                    self._data[lang].append(tokens)
-
-                    if (i + 1) % 1_000 == 0 or i == len(examples) - 1:
-                        pbar.set_postfix({lang: f"{i + 1}/{len(examples)}"})
+        for lang, examples in data.items():
+            _logger.info(f"Processing {len(examples)} examples from {lang} lang...")
+            for i, full_example in enumerate(examples):
+                sentence = " ".join(full_example["tokens"])
+                sentence = re.sub(self._digit_or_punctuation, "", sentence)
+                tokens = tokenizer.encode(sentence, add_special_tokens=False)
+                self._data[lang].append(tokens)
 
         self._bos_id = bos_id
         self._eos_id = eos_id
+
+        self._rng = default_rng()
 
         self._is_train = is_train
         if not is_train:
@@ -56,21 +53,19 @@ class MultiLanguageClassificationDataset(IterableDataset):
     def generate_example(
         self, min_langs: int = 1, max_langs: int = 5, max_samples_per_lang: int = 5, max_seq_len: int = 512
     ) -> SAMPLE:
-        n_langs = randint(min_langs, max_langs)
-        langs = sample(self._langs, k=n_langs)
+        n_langs = int(self._rng.uniform(min_langs, max_langs + 1))
+        langs = self._rng.choice(self._langs, size=n_langs, replace=False)
 
         selected_samples, selected_langs = [], []
         for lang in langs:
-            n_samples = randint(1, max_samples_per_lang)
-            cur_samples = sample(self._data[lang], k=n_samples)
-
+            n_samples = int(self._rng.uniform(1, max_samples_per_lang + 1))
+            cur_samples = self._rng.choice(len(self._data[lang]), size=n_samples, replace=False)
             lang_id = self._langs.index(lang)
-            lang_seq = [[lang_id] * len(s) for s in cur_samples]
 
-            selected_samples += cur_samples
-            selected_langs += lang_seq
+            selected_samples += [self._data[lang][i] for i in cur_samples]
+            selected_langs += [[lang_id] * len(self._data[lang][i]) for i in cur_samples]
 
-        random_permutation = permutation(len(selected_samples))
+        random_permutation = self._rng.permutation(len(selected_samples))
         input_seq = concatenate([[self._bos_id]] + [selected_samples[i] for i in random_permutation] + [[self._eos_id]])
         target = concatenate([[self._n_langs]] + [selected_langs[i] for i in random_permutation] + [[self._n_langs]])
 
@@ -82,4 +77,4 @@ class MultiLanguageClassificationDataset(IterableDataset):
     @gin.configurable
     def generate_eval_samples(self, n_samples: int = 10_000) -> list[SAMPLE]:
         _logger.info(f"Generating eval holdout with {n_samples} samples.")
-        return [self.generate_example() for _ in trange(n_samples, desc="Generating eval samples")]
+        return [self.generate_example() for _ in range(n_samples)]
