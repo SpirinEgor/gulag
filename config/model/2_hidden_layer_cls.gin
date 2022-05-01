@@ -1,0 +1,9 @@
+import gin.torch.external_configurables
+
+# ==============================================================================
+#                                 Token Classifier
+# ==============================================================================
+
+TokenClassifier.hidden_dims = (512, 512)
+TokenClassifier.activation_cls = @ReLU
+TokenClassifier.dropout_rate = 0.2
