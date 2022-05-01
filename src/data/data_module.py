@@ -18,18 +18,26 @@ _logger = logging.getLogger(__name__)
 
 @gin.configurable
 class MultiLanguageClassificationDataModule(LightningDataModule):
-    def __init__(self, languages: tuple[str] = gin.REQUIRED, batch_size: int = 128, val_batch_size: int = 256):
+    def __init__(
+        self,
+        languages: tuple[str] = gin.REQUIRED,
+        batch_size: int = 128,
+        val_batch_size: int = 256,
+        tokenizer_name: str = "bert-base-multilingual-cased",
+    ):
         super().__init__()
         self._languages = languages
         self._batch_size = batch_size
         self._val_batch_size = val_batch_size
+
+        self._tokenizer_name = tokenizer_name
 
     def setup(self, stage: Optional[str] = None):
         _logger.info(f"Downloading and opening 'wikiann' dataset for {', '.join(self._languages)}")
         full_data = {code: load_dataset("wikiann", code) for code in self._languages}
 
         _logger.info(f"Downloading and opening 'bert-base-multilingual-cased' tokenizer")
-        self._tokenizer = BertTokenizer.from_pretrained("bert-base-multilingual-cased")
+        self._tokenizer = BertTokenizer.from_pretrained(self._tokenizer_name)
         self._bos_id = self._tokenizer.cls_token_id
         self._eos_id = self._tokenizer.sep_token_id
 
@@ -69,6 +77,10 @@ class MultiLanguageClassificationDataModule(LightningDataModule):
     @property
     def tokenizer(self) -> Tokenizer:
         return self._tokenizer
+
+    @property
+    def n_languages(self) -> int:
+        return len(self._languages)
 
     def decode_languages(self, languages: torch.Tensor):
         return [(self._languages[i] if i < len(self._languages) else "[NOT LANG]") for i in languages]

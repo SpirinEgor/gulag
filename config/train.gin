@@ -5,3 +5,14 @@
 MultiLanguageClassificationDataModule.languages = ("ru", "uk", "be", "kk", "az", "hy", "ka", "he", "en", "de")
 MultiLanguageClassificationDataModule.batch_size = 5
 MultiLanguageClassificationDataModule.val_batch_size = 10
+MultiLanguageClassificationDataModule.tokenizer_name = "bert-base-multilingual-cased"
+
+# ==============================================================================
+#                            Multi-Language Classifier
+# ==============================================================================
+
+MultiLanguageClassifier.embedder_name = "bert-base-multilingual-cased"
+MultiLanguageClassifier.freeze_embedder = True
+
+configure_optimizers.lr = 0.001
+configure_optimizers.weight_decay = 0.0
