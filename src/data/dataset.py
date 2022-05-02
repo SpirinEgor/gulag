@@ -50,14 +50,11 @@ class MultiLanguageClassificationDataset(IterableDataset):
             return self
 
         worker_info = get_worker_info()
-        if worker_info is None:  # single-process data loading, return the full iterator
+        # single-process data loading, return the full iterator
+        # eval data already preprocessed, no need to parallelize
+        if worker_info is None or worker_info.id == 0:
             return iter(self._samples)
-
-        per_worker = int(ceil(len(self._samples) / float(worker_info.num_workers)))
-        iter_start = worker_info.id * per_worker
-        iter_end = min(iter_start + per_worker, len(self._samples))
-
-        return iter(self._samples[iter_start:iter_end])
+        return iter([])
 
     @gin.configurable
     def generate_example(
