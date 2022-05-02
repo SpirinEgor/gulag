@@ -11,7 +11,6 @@ configure_optimizers.scheduler_cls = @LambdaLR
 AdamW.lr = 1e-3
 AdamW.weight_decay = 0.0
 
-LambdaLR.lr_lambda = @lr_scheduler_rsqrt_with_warmup
+LambdaLR.lr_lambda = @rsqrt_with_warmup
 
-lr_scheduler_rsqrt_with_warmup.warmup_steps = 1_000
-lr_scheduler_rsqrt_with_warmup.multiplier = 0.05
+rsqrt_with_warmup.warmup_steps = 1_000

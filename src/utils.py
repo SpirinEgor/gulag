@@ -15,17 +15,17 @@ def setup_logging():
 
 
 @gin.configurable
-def lr_scheduler_rsqrt_with_warmup(step: int, warmup_steps: int = gin.REQUIRED, multiplier: float = 1.0) -> float:
-    """Define the learning rate as reverse sqrt of the current step.
+def rsqrt_with_warmup(step: int, warmup_steps: int = gin.REQUIRED) -> float:
+    """Define a scheduler for learning rate with a form of reverse sqrt with respect to the current step.
     Warmup points to constant learning rate for first 'n' steps.
+    Implemented as multiplier for initial learning rate, i.e. to use with `torch.optim.LambdaLR`.
 
-    For example, if `warmup_steps = 1e4` and `multiplier = 2.0`, then:
-    - First 10_000 steps use (2.0 / sqrt(1e4) = 2.0 * 1e-2 = 0.02) learning rate;
-    - After that use (2.0 / sqrt(cur_step)) learning rate;
+    For example, if `warmup_steps = 10_000`, then:
+    – First 10_000 steps use initial learning rate;
+    – After that multiply learning rate by `sqrt(warmup_steps) / sqrt(cur_step)`;
 
     :param step: current step
     :param warmup_steps: number of warmup steps
-    :param multiplier: multiplier to adjust learning rate
-    :return: next learning rate
+    :return: multiplier for the next learning rate
     """
-    return multiplier / sqrt(max(step, warmup_steps))
+    return sqrt(warmup_steps) / sqrt(max(step, warmup_steps))

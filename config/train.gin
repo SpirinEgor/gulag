@@ -14,4 +14,4 @@ train.eval_steps = 1_000
 train.gradient_clip = 1.0
 train.log_steps = 10
 train.seed = 7
-train.wandb_project_name = "multi_language_classification"
+train.wandb_project_name = "gulag"

@@ -15,12 +15,12 @@ MultiLanguageClassificationDataModule.val_batch_size = 16
 
 TokenClassifier.hidden_dims = (32,)
 
-lr_scheduler_rsqrt_with_warmup.warmup_steps = 10
+rsqrt_with_warmup.warmup_steps = 10
 
-train.n_steps = 100
+train.n_steps = 1_000
 train.accelerator = "cpu"
 train.eval_steps = 10
 train.gradient_clip = 1.0
 train.log_steps = 1
 train.seed = 7
-train.wandb_project_name = "multi_language_classification_debug"
+train.wandb_project_name = "gulag_debug"
