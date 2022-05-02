@@ -31,17 +31,16 @@ def train(
     gradient_clip: float = 0.0,
     log_steps: int = 50,
     seed: int = 7,
-    debug: bool = False,
+    wandb_project_name: str = None,
 ):
     seed_everything(seed)
     setup_logging()
 
-    wandb_project_name = "multi_language_classification" + ("_debug" if debug else "")
     wandb_logger = WandbLogger(project=wandb_project_name)
     checkpoint_callback = ModelCheckpoint(
         wandb_logger.experiment.dir,
-        filename="step_{step}_val_loss_{val/loss:.4f}",
-        monitor="val/loss",
+        filename="step_{step}.ckpt",
+        every_n_train_steps=eval_steps,
         save_top_k=-1,
         auto_insert_metric_name=False,
     )
@@ -60,8 +59,8 @@ def train(
         val_check_interval=eval_steps,
     )
 
-    with open(join(wandb_logger.experiment.dir, "operative_config.gin"), "w") as f:
-        f.write(gin.operative_config_str())
+    with open(join(wandb_logger.experiment.dir, "config.gin"), "w") as f:
+        f.write(gin.config_str())
 
     trainer.fit(model, datamodule=data_module)
     trainer.test(datamodule=data_module)

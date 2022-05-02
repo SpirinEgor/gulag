@@ -1,37 +1,21 @@
-import gin.torch.external_configurables
-import src.utils
+# Additional config with overwritten params for small dataset and model
+# Useful for local debugging on CPU
 
-# ==============================================================================
-#                    Multi-Language Classification Data Module
-# ==============================================================================
+include 'config/data/synthetic_dataset.gin'
+include 'config/model/bert_base_classifier.gin'
+include 'config/optimizer.gin'
+
+
+generate_example.max_seq_len = 256
+generate_eval_samples.n_samples = 100
 
 MultiLanguageClassificationDataModule.languages = ("ru", "uk", "be")
-MultiLanguageClassificationDataModule.batch_size = 5
-MultiLanguageClassificationDataModule.val_batch_size = 10
-MultiLanguageClassificationDataModule.tokenizer_name = "bert-base-multilingual-cased"
-MultiLanguageClassificationDataModule.num_workers = 4
+MultiLanguageClassificationDataModule.batch_size = 8
+MultiLanguageClassificationDataModule.val_batch_size = 16
 
-# ==============================================================================
-#                            Multi-Language Classifier
-# ==============================================================================
-
-MultiLanguageClassifier.embedder_name = "bert-base-multilingual-cased"
-MultiLanguageClassifier.freeze_embedder = True
-
-configure_optimizers.optimizer_cls = @AdamW
-configure_optimizers.scheduler_cls = @LambdaLR
-
-AdamW.lr = 1e-3
-AdamW.weight_decay = 0.0
-
-LambdaLR.lr_lambda = @lr_scheduler_rsqrt_with_warmup
+TokenClassifier.hidden_dims = (32,)
 
 lr_scheduler_rsqrt_with_warmup.warmup_steps = 10
-lr_scheduler_rsqrt_with_warmup.multiplier = 0.05
-
-# ==============================================================================
-#                                  train
-# ==============================================================================
 
 train.n_steps = 100
 train.accelerator = "cpu"
@@ -39,7 +23,4 @@ train.eval_steps = 10
 train.gradient_clip = 1.0
 train.log_steps = 1
 train.seed = 7
-train.debug = True
-
-# useful to speed up debugging
-generate_eval_samples.n_samples = 100
+train.wandb_project_name = "multi_language_classification_debug"

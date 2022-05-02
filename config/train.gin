@@ -1,33 +1,8 @@
-import gin.torch.external_configurables
-import src.utils
+# Main config to train model
 
-# ==============================================================================
-#                    Multi-Language Classification Data Module
-# ==============================================================================
-
-MultiLanguageClassificationDataModule.languages = ("ru", "uk", "be", "kk", "az", "hy", "ka", "he", "en", "de")
-MultiLanguageClassificationDataModule.batch_size = 32
-MultiLanguageClassificationDataModule.val_batch_size = 128
-MultiLanguageClassificationDataModule.tokenizer_name = "bert-base-multilingual-cased"
-MultiLanguageClassificationDataModule.num_workers = -1
-
-# ==============================================================================
-#                            Multi-Language Classifier
-# ==============================================================================
-
-MultiLanguageClassifier.embedder_name = "bert-base-multilingual-cased"
-MultiLanguageClassifier.freeze_embedder = True
-
-MultiLanguageClassifier.configure_optimizers.optimizer_cls = @AdamW
-MultiLanguageClassifier.configure_optimizers.scheduler_cls = @LambdaLR
-
-AdamW.lr = 1e-3
-AdamW.weight_decay = 0.0
-
-LambdaLR.lr_lambda = @lr_scheduler_rsqrt_with_warmup
-
-lr_scheduler_rsqrt_with_warmup.warmup_steps = 1_000
-lr_scheduler_rsqrt_with_warmup.multiplier = 0.05
+include 'config/data/synthetic_dataset.gin'
+include 'config/model/base_classifier.gin'
+include 'config/optimizer.gin'
 
 # ==============================================================================
 #                                  train
@@ -39,4 +14,4 @@ train.eval_steps = 1_000
 train.gradient_clip = 1.0
 train.log_steps = 10
 train.seed = 7
-train.debug = False
+train.wandb_project_name = "multi_language_classification"

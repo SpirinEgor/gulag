@@ -1,6 +1,13 @@
 import gin.torch.external_configurables
 
 # ==============================================================================
+#                            Multi-Language Classifier
+# ==============================================================================
+
+MultiLanguageClassifier.embedder_name = "bert-base-multilingual-cased"
+MultiLanguageClassifier.freeze_embedder = True
+
+# ==============================================================================
 #                                 Token Classifier
 # ==============================================================================
 

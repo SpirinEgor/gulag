@@ -1,6 +1,7 @@
 import logging
 import re
 from collections import defaultdict
+from math import ceil
 from string import punctuation, digits
 from typing import Iterator, Tuple
 
@@ -8,7 +9,7 @@ import gin
 from numpy import ndarray, concatenate
 from numpy.random import default_rng
 from tokenizers import Tokenizer
-from torch.utils.data import IterableDataset
+from torch.utils.data import IterableDataset, get_worker_info
 
 _logger = logging.getLogger(__name__)
 
@@ -25,7 +26,7 @@ class MultiLanguageClassificationDataset(IterableDataset):
         self._n_langs = len(self._langs)
         _logger.info(f"Initializing dataset with {', '.join(self._langs)} languages")
 
-        self._data = defaultdict(lambda: [])
+        self._data = defaultdict(list)
         for lang, examples in data.items():
             _logger.info(f"Processing {len(examples)} examples from {lang} lang...")
             for i, full_example in enumerate(examples):
@@ -44,15 +45,25 @@ class MultiLanguageClassificationDataset(IterableDataset):
             self._samples = self.generate_eval_samples()
 
     def __iter__(self) -> Iterator[SAMPLE]:
+        # On training each sample is unique => no care about workers
         if self._is_train:
             return self
-        else:
+
+        worker_info = get_worker_info()
+        if worker_info is None:  # single-process data loading, return the full iterator
             return iter(self._samples)
+
+        per_worker = int(ceil(len(self._samples) / float(worker_info.num_workers)))
+        iter_start = worker_info.id * per_worker
+        iter_end = min(iter_start + per_worker, len(self._samples))
+
+        return iter(self._samples[iter_start:iter_end])
 
     @gin.configurable
     def generate_example(
         self, min_langs: int = 1, max_langs: int = 5, max_samples_per_lang: int = 5, max_seq_len: int = 512
     ) -> SAMPLE:
+        max_langs = min(max_langs, self._n_langs)
         n_langs = int(self._rng.uniform(min_langs, max_langs + 1))
         langs = self._rng.choice(self._langs, size=n_langs, replace=False)
 

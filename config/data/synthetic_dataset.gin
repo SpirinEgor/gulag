@@ -7,4 +7,15 @@ generate_example.max_langs = 5
 generate_example.max_samples_per_lang = 5
 generate_example.max_seq_len = 512
 
-generate_eval_samples.n_samples = 10000
+generate_eval_samples.n_samples = 10_000
+
+# ==============================================================================
+#                    Multi-Language Classification Data Module
+# ==============================================================================
+
+MultiLanguageClassificationDataModule.languages = ("ru", "uk", "be", "kk", "az", "hy", "ka", "he", "en", "de")
+MultiLanguageClassificationDataModule.batch_size = 32
+MultiLanguageClassificationDataModule.val_batch_size = 128
+MultiLanguageClassificationDataModule.tokenizer_name = "bert-base-multilingual-cased"
+MultiLanguageClassificationDataModule.num_workers = -1
+
