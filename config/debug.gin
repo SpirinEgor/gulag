@@ -17,7 +17,7 @@ TokenClassifier.hidden_dims = (32,)
 
 rsqrt_with_warmup.warmup_steps = 10
 
-train.n_steps = 1_000
+train.n_steps = 100
 train.accelerator = "cpu"
 train.eval_steps = 10
 train.gradient_clip = 1.0
