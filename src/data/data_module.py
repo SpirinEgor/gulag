@@ -1,4 +1,5 @@
 import logging
+from multiprocessing import cpu_count
 from typing import Optional
 
 import gin
@@ -24,6 +25,7 @@ class MultiLanguageClassificationDataModule(LightningDataModule):
         batch_size: int = 128,
         val_batch_size: int = 256,
         tokenizer_name: str = "bert-base-multilingual-cased",
+        num_workers: int = -1,
     ):
         super().__init__()
         self._languages = languages
@@ -31,6 +33,8 @@ class MultiLanguageClassificationDataModule(LightningDataModule):
         self._val_batch_size = val_batch_size
 
         self._tokenizer_name = tokenizer_name
+
+        self._num_workers = num_workers if num_workers >= 0 else cpu_count()
 
     def setup(self, stage: Optional[str] = None):
         _logger.info(f"Downloading and opening 'wikiann' dataset for {', '.join(self._languages)}")
@@ -44,19 +48,34 @@ class MultiLanguageClassificationDataModule(LightningDataModule):
         self._datasets = {}
         for split in ["train", "validation", "test"]:
             _logger.info(f"Initializing {split} dataset")
-            data = {code: full_data[code][split] for code in self._languages}  # type: ignore
+            data: dict[str, list] = {code: full_data[code][split] for code in self._languages}  # type: ignore
             self._datasets[split] = MultiLanguageClassificationDataset(
                 data, self._tokenizer, self._bos_id, self._eos_id, is_train=(split == "train")
             )
 
     def train_dataloader(self) -> TRAIN_DATALOADERS:
-        return DataLoader(self._datasets["train"], batch_size=self._batch_size, collate_fn=self.collate_fn)
+        return DataLoader(
+            self._datasets["train"],
+            batch_size=self._batch_size,
+            collate_fn=self.collate_fn,
+            num_workers=self._num_workers,
+        )
 
     def val_dataloader(self) -> EVAL_DATALOADERS:
-        return DataLoader(self._datasets["validation"], batch_size=self._val_batch_size, collate_fn=self.collate_fn)
+        return DataLoader(
+            self._datasets["validation"],
+            batch_size=self._val_batch_size,
+            collate_fn=self.collate_fn,
+            num_workers=self._num_workers,
+        )
 
     def test_dataloader(self) -> EVAL_DATALOADERS:
-        return DataLoader(self._datasets["test"], batch_size=self._val_batch_size, collate_fn=self.collate_fn)
+        return DataLoader(
+            self._datasets["test"],
+            batch_size=self._val_batch_size,
+            collate_fn=self.collate_fn,
+            num_workers=self._num_workers,
+        )
 
     def collate_fn(self, samples: list[SAMPLE]) -> tuple[torch.Tensor, ...]:
         max_len = max(len(x[0]) for x in samples)

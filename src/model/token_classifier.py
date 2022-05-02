@@ -14,7 +14,7 @@ class TokenClassifier(nn.Module):
         self,
         n_classes: int,
         embed_dim: int,
-        hidden_dims: tuple[int] = (512,),
+        hidden_dims: tuple[int, ...] = (512,),
         activation_cls: Type[nn.Module] = nn.ReLU,
         dropout_rate: float = 0.0,
     ):
@@ -38,5 +38,4 @@ class TokenClassifier(nn.Module):
         :param token_embeddings: [batch size; seq len; embed dim] -- embeddings of each token in all sequences
         :return: [batch size; seq len; n classes] -- logits for each token
         """
-        print(token_embeddings.shape)
         return self._net(token_embeddings)

@@ -7,3 +7,6 @@ import gin.torch.external_configurables
 TokenClassifier.hidden_dims = (512, 512)
 TokenClassifier.activation_cls = @ReLU
 TokenClassifier.dropout_rate = 0.2
+
+ReLU.inplace = True
+

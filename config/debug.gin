@@ -5,11 +5,11 @@ import src.utils
 #                    Multi-Language Classification Data Module
 # ==============================================================================
 
-MultiLanguageClassificationDataModule.languages = ("ru", "uk", "be", "kk", "az", "hy", "ka", "he", "en", "de")
-MultiLanguageClassificationDataModule.batch_size = 32
-MultiLanguageClassificationDataModule.val_batch_size = 128
+MultiLanguageClassificationDataModule.languages = ("ru", "uk", "be")
+MultiLanguageClassificationDataModule.batch_size = 5
+MultiLanguageClassificationDataModule.val_batch_size = 10
 MultiLanguageClassificationDataModule.tokenizer_name = "bert-base-multilingual-cased"
-MultiLanguageClassificationDataModule.num_workers = -1
+MultiLanguageClassificationDataModule.num_workers = 4
 
 # ==============================================================================
 #                            Multi-Language Classifier
@@ -18,25 +18,28 @@ MultiLanguageClassificationDataModule.num_workers = -1
 MultiLanguageClassifier.embedder_name = "bert-base-multilingual-cased"
 MultiLanguageClassifier.freeze_embedder = True
 
-MultiLanguageClassifier.configure_optimizers.optimizer_cls = @AdamW
-MultiLanguageClassifier.configure_optimizers.scheduler_cls = @LambdaLR
+configure_optimizers.optimizer_cls = @AdamW
+configure_optimizers.scheduler_cls = @LambdaLR
 
 AdamW.lr = 1e-3
 AdamW.weight_decay = 0.0
 
 LambdaLR.lr_lambda = @lr_scheduler_rsqrt_with_warmup
 
-lr_scheduler_rsqrt_with_warmup.warmup_steps = 1_000
+lr_scheduler_rsqrt_with_warmup.warmup_steps = 10
 lr_scheduler_rsqrt_with_warmup.multiplier = 0.05
 
 # ==============================================================================
 #                                  train
 # ==============================================================================
 
-train.n_steps = 10_000
-train.accelerator = "gpu"
-train.eval_steps = 1_000
+train.n_steps = 100
+train.accelerator = "cpu"
+train.eval_steps = 10
 train.gradient_clip = 1.0
-train.log_steps = 10
+train.log_steps = 1
 train.seed = 7
-train.debug = False
+train.debug = True
+
+# useful to speed up debugging
+generate_eval_samples.n_samples = 100

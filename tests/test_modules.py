@@ -3,13 +3,14 @@ import torch
 from src.model.token_classifier import TokenClassifier
 
 
-def test_token_classifier():
-    embed_dim = 64
+def test_smoke_token_classifier():
+    batch_size, seq_len, num_classes = 5, 7, 10
+    embed_dim, hidden_dims = 64, (32, 32)
 
-    token_classifier = TokenClassifier(10, embed_dim, hidden_dims=(32,))
-    rand_inputs = torch.rand(5, 7, embed_dim)  # rand input with batch size 5 and seq len 7
+    token_classifier = TokenClassifier(num_classes, embed_dim, hidden_dims=hidden_dims)
+    rand_inputs = torch.rand(batch_size, seq_len, embed_dim)
 
     try:
         token_classifier(rand_inputs)
     except RuntimeError as e:
-        assert False, f"Smoke forward pass failed:\n{e}"
+        assert False, f"Smoke forward pass for token classifier failed:\n{e}"
