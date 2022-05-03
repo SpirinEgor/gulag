@@ -1,7 +1,7 @@
 # Main config to train model
 
 include 'config/data/synthetic_dataset.gin'
-include 'config/model/base_classifier.gin'
+include 'config/model/bert_base_classifier.gin'
 include 'config/optimizer.gin'
 
 # ==============================================================================
