@@ -1,5 +1,6 @@
 import logging
 from itertools import chain
+from typing import Tuple, List
 
 import gin
 import torch.optim
@@ -68,7 +69,7 @@ class MultiLanguageClassifier(LightningModule):
             },
         }
 
-    def shared_step(self, batch: tuple[Tensor, ...], split: str) -> STEP_OUTPUT:
+    def shared_step(self, batch: Tuple[Tensor, ...], split: str) -> STEP_OUTPUT:
         input_ids, attention_mask, labels = batch
         bs, seq_len = labels.shape
 
@@ -92,32 +93,32 @@ class MultiLanguageClassifier(LightningModule):
             self.log_dict({"train/step_loss": loss, "train/step_f1": batch_f1})
         return loss
 
-    def training_step(self, batch: tuple[Tensor, ...], batch_idx: int) -> STEP_OUTPUT:  # type: ignore
+    def training_step(self, batch: Tuple[Tensor, ...], batch_idx: int) -> STEP_OUTPUT:  # type: ignore
         del batch_idx
         return self.shared_step(batch, "train")
 
-    def validation_step(self, batch: tuple[Tensor, ...], batch_idx: int) -> STEP_OUTPUT:  # type: ignore
+    def validation_step(self, batch: Tuple[Tensor, ...], batch_idx: int) -> STEP_OUTPUT:  # type: ignore
         del batch_idx
         return self.shared_step(batch, "val")
 
-    def test_step(self, batch: tuple[Tensor, ...], batch_idx: int) -> STEP_OUTPUT:  # type: ignore
+    def test_step(self, batch: Tuple[Tensor, ...], batch_idx: int) -> STEP_OUTPUT:  # type: ignore
         del batch_idx
         return self.shared_step(batch, "test")
 
-    def shared_epoch_end(self, epoch_outputs: list[Tensor], split: str):
+    def shared_epoch_end(self, epoch_outputs: List[Tensor], split: str):
         mean_loss = torch.stack(epoch_outputs).mean()
         epoch_f1 = self._get_f1_metric(split).compute()
         self._get_f1_metric(split).reset()
 
         self.log_dict({f"{split}/loss": mean_loss, f"{split}/f1": epoch_f1})
 
-    def training_epoch_end(self, epoch_outputs: list[dict[str, Tensor]]):  # type: ignore
+    def training_epoch_end(self, epoch_outputs: List[dict[str, Tensor]]):  # type: ignore
         self.shared_epoch_end([eo["loss"] for eo in epoch_outputs], "train")
 
-    def validation_epoch_end(self, epoch_outputs: list[Tensor]):  # type: ignore
+    def validation_epoch_end(self, epoch_outputs: List[Tensor]):  # type: ignore
         self.shared_epoch_end(epoch_outputs, "val")
 
-    def test_epoch_end(self, epoch_outputs: list[Tensor]):  # type: ignore
+    def test_epoch_end(self, epoch_outputs: List[Tensor]):  # type: ignore
         self.shared_epoch_end(epoch_outputs, "test")
 
     def _get_f1_metric(self, split: str) -> F1Score:

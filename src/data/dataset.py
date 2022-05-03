@@ -3,7 +3,7 @@ import re
 from collections import defaultdict
 from math import ceil
 from string import punctuation, digits
-from typing import Iterator, Tuple
+from typing import Iterator, Tuple, Dict, List
 
 import gin
 from numpy import ndarray, concatenate
@@ -21,7 +21,7 @@ class MultiLanguageClassificationDataset(IterableDataset):
 
     _digit_or_punctuation = re.compile(f"[{digits}{punctuation}«»]")
 
-    def __init__(self, data: dict[str, list], tokenizer: Tokenizer, bos_id: int, eos_id: int, is_train: bool = True):
+    def __init__(self, data: Dict[str, List], tokenizer: Tokenizer, bos_id: int, eos_id: int, is_train: bool = True):
         self._langs = list(data.keys())
         self._n_langs = len(self._langs)
         _logger.info(f"Initializing dataset with {', '.join(self._langs)} languages")
@@ -83,6 +83,6 @@ class MultiLanguageClassificationDataset(IterableDataset):
         return self.generate_example()
 
     @gin.configurable
-    def generate_eval_samples(self, n_samples: int = 10_000) -> list[SAMPLE]:
+    def generate_eval_samples(self, n_samples: int = 10_000) -> List[SAMPLE]:
         _logger.info(f"Generating eval holdout with {n_samples} samples.")
         return [self.generate_example() for _ in range(n_samples)]

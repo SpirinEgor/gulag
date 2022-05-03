@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Optional, Tuple, List
 
 import gin
 import torch
@@ -19,7 +19,7 @@ _logger = logging.getLogger(__name__)
 class MultiLanguageClassificationDataModule(LightningDataModule):
     def __init__(
         self,
-        languages: tuple[str] = gin.REQUIRED,
+        languages: Tuple[str] = gin.REQUIRED,
         batch_size: int = 128,
         val_batch_size: int = 256,
         tokenizer_name: str = "bert-base-multilingual-cased",
@@ -57,7 +57,7 @@ class MultiLanguageClassificationDataModule(LightningDataModule):
     def test_dataloader(self) -> EVAL_DATALOADERS:
         return DataLoader(self._datasets["test"], batch_size=self._val_batch_size, collate_fn=self.collate_fn)
 
-    def collate_fn(self, samples: list[SAMPLE]) -> tuple[torch.Tensor, ...]:
+    def collate_fn(self, samples: List[SAMPLE]) -> Tuple[torch.Tensor, ...]:
         max_len = max(len(x[0]) for x in samples)
         batch_size = len(samples)
 
@@ -81,5 +81,5 @@ class MultiLanguageClassificationDataModule(LightningDataModule):
     def n_languages(self) -> int:
         return len(self._languages)
 
-    def decode_languages(self, languages: torch.Tensor):
+    def decode_languages(self, languages: torch.Tensor) -> List[str]:
         return [(self._languages[i] if i < len(self._languages) else "[NOT LANG]") for i in languages]

@@ -1,5 +1,5 @@
 import logging
-from typing import Type
+from typing import Type, Tuple
 
 import gin
 from torch import nn, Tensor
@@ -14,7 +14,7 @@ class TokenClassifier(nn.Module):
         self,
         n_classes: int,
         embed_dim: int,
-        hidden_dims: tuple[int, ...] = (512,),
+        hidden_dims: Tuple[int, ...] = (512,),
         activation_cls: Type[nn.Module] = nn.ReLU,
         dropout_rate: float = 0.0,
     ):
