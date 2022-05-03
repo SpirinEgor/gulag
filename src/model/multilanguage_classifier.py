@@ -1,6 +1,6 @@
 import logging
 from itertools import chain
-from typing import Tuple, List
+from typing import Tuple, List, Dict
 
 import gin
 import torch.optim
