@@ -1,7 +1,6 @@
 import logging
 import re
 from collections import defaultdict
-from math import ceil
 from string import punctuation, digits
 from typing import Iterator, Tuple, Dict, List
 
@@ -21,6 +20,10 @@ class MultiLanguageClassificationDataset(IterableDataset):
 
     _digit_or_punctuation = re.compile(f"[{digits}{punctuation}«»]")
 
+    @classmethod
+    def prepare_text(cls, text: str) -> str:
+        return re.sub(cls._digit_or_punctuation, "", text)
+
     def __init__(self, data: Dict[str, List], tokenizer: Tokenizer, bos_id: int, eos_id: int, is_train: bool = True):
         self._langs = list(data.keys())
         self._n_langs = len(self._langs)
@@ -30,9 +33,9 @@ class MultiLanguageClassificationDataset(IterableDataset):
         for lang, examples in data.items():
             _logger.info(f"Processing {len(examples)} examples from {lang} lang...")
             for i, full_example in enumerate(examples):
-                sentence = " ".join(full_example["tokens"])
-                sentence = re.sub(self._digit_or_punctuation, "", sentence)
-                tokens = tokenizer.encode(sentence, add_special_tokens=False)
+                text = " ".join(full_example["tokens"])
+                text = self.prepare_text(text)
+                tokens = tokenizer.encode(text, add_special_tokens=False)
                 self._data[lang].append(tokens)
 
         self._bos_id = bos_id
