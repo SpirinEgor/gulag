@@ -10,16 +10,22 @@ from pytorch_lightning.loggers import WandbLogger
 
 from src.data import MultiLanguageClassificationDataModule
 from src.model import MultiLanguageClassifier
-from src.utils import setup_logging
+from src.utils import setup_logging, get_infer_fn
 
 _logger = logging.getLogger(__name__)
 
 
 def configure_arg_parser() -> ArgumentParser:
-    argument_parser = ArgumentParser(description="Train or infer model to guess the languages in the text.")
-    argument_parser.add_argument("mode", choices=["train", "infer"], help="Mode to run model")
-    argument_parser.add_argument("--gin-file", action="append", help="Gin file to parse")
-    argument_parser.add_argument("--gin-param", action="append", help="Gin param to bind")
+    argument_parser = ArgumentParser(description="CLI for GULAG: GUess LAnGuages with neural networks.")
+    subparsers = argument_parser.add_subparsers(dest="mode", help="Sub-commands to select model training or inference.")
+
+    parser_train = subparsers.add_parser("train", help="Run model training.")
+    parser_train.add_argument("--gin-file", action="append", help="Gin file configuration to parse")
+    parser_train.add_argument("--gin-param", action="append", help="Additional gin param to bind")
+
+    parser_infer = subparsers.add_parser("infer", help="Run model inference.")
+    parser_infer.add_argument("--wandb", type=str, default="voudy/gulag/1ykm0l2n", help="W&B run path")
+    parser_infer.add_argument("--ckpt", type=str, default="step_20000.ckpt.ckpt", help="Checkpoint name")
 
     return argument_parser
 
@@ -70,17 +76,22 @@ def train(
     wandb.finish()
 
 
-def infer():
-    pass
+def infer(wandb_run_path: str, ckpt_name: str):
+    setup_logging()
+    infer_fn = get_infer_fn(wandb_run_path, ckpt_name)
+
+    while True:
+        text = input("Enter text to classify languages (Ctrl-C to exit):\n")
+        prediction = infer_fn(text)
+        print(prediction)
 
 
 if __name__ == "__main__":
     _arg_parser = configure_arg_parser()
     _args = _arg_parser.parse_args()
 
-    gin.parse_config_files_and_bindings(_args.gin_file, _args.gin_param)
-
     if _args.mode == "train":
+        gin.parse_config_files_and_bindings(_args.gin_file, _args.gin_param)
         train()
     else:
-        infer()
+        infer(_args.wandb, _args.ckpt)
