@@ -17,5 +17,3 @@ MultiLanguageClassificationDataModule.languages = ("ru", "uk", "be", "kk", "az",
 MultiLanguageClassificationDataModule.batch_size = 32
 MultiLanguageClassificationDataModule.val_batch_size = 128
 MultiLanguageClassificationDataModule.tokenizer_name = "bert-base-multilingual-cased"
-MultiLanguageClassificationDataModule.num_workers = -1
-
