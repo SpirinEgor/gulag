@@ -3,6 +3,7 @@ from argparse import ArgumentParser
 from os.path import join
 
 import gin
+import wandb
 from pytorch_lightning import seed_everything, Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
 from pytorch_lightning.loggers import WandbLogger
@@ -43,6 +44,7 @@ def train(
         every_n_train_steps=eval_steps,
         save_top_k=-1,
         auto_insert_metric_name=False,
+        save_on_train_epoch_end=True,
     )
     lr_logger = LearningRateMonitor("step")
 
@@ -64,6 +66,8 @@ def train(
 
     trainer.fit(model, datamodule=data_module)
     trainer.test(datamodule=data_module)
+
+    wandb.finish()
 
 
 def infer():
