@@ -112,7 +112,7 @@ class MultiLanguageClassifier(LightningModule):
 
         self.log_dict({f"{split}/loss": mean_loss, f"{split}/f1": epoch_f1})
 
-    def training_epoch_end(self, epoch_outputs: List[dict[str, Tensor]]):  # type: ignore
+    def training_epoch_end(self, epoch_outputs: List[Dict[str, Tensor]]):  # type: ignore
         self.shared_epoch_end([eo["loss"] for eo in epoch_outputs], "train")
 
     def validation_epoch_end(self, epoch_outputs: List[Tensor]):  # type: ignore
