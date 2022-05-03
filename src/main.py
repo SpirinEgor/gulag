@@ -40,7 +40,7 @@ def train(
     wandb_logger = WandbLogger(project=wandb_project_name)
     checkpoint_callback = ModelCheckpoint(
         wandb_logger.experiment.dir,
-        filename="step_{step}.ckpt",
+        filename="step_{step}",
         every_n_train_steps=eval_steps,
         save_top_k=-1,
         auto_insert_metric_name=False,
