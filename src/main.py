@@ -40,6 +40,16 @@ def train(
     seed: int = 7,
     wandb_project_name: str = None,
 ):
+    """Main function to run model training.
+
+    :param n_steps: number of training steps.
+    :param accelerator: name of accelerator, e.g. "gpu".
+    :param eval_steps: period of evaluation.
+    :param gradient_clip: gradient clipping value, 0.0 means no gradient clipping.
+    :param log_steps: period of logging step.
+    :param seed: random seed.
+    :param wandb_project_name: name of W&B project to log progress.
+    """
     seed_everything(seed)
     setup_logging()
 
@@ -77,6 +87,11 @@ def train(
 
 
 def infer(wandb_run_path: str, ckpt_name: str):
+    """Function to run model inference via CLI.
+
+    :param wandb_run_path: W&B run path where model is saved.
+    :param ckpt_name: Name of checkpoint in specified run.
+    """
     setup_logging()
     infer_fn = get_infer_fn(wandb_run_path, ckpt_name)
 

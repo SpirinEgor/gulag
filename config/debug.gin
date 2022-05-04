@@ -19,8 +19,8 @@ rsqrt_with_warmup.warmup_steps = 10
 
 train.n_steps = 100
 train.accelerator = "cpu"
-train.eval_steps = 10
+train.eval_steps = 50
 train.gradient_clip = 1.0
-train.log_steps = 1
+train.log_steps = 10
 train.seed = 7
 train.wandb_project_name = "gulag_debug"

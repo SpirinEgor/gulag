@@ -9,7 +9,7 @@ from pytorch_lightning.utilities.types import STEP_OUTPUT
 from torch import Tensor
 from torch.nn import functional as F
 from torchmetrics import F1Score, MetricCollection
-from transformers import BertModel
+from transformers import AutoModel
 
 from src.model.token_classifier import TokenClassifier
 
@@ -18,12 +18,28 @@ _logger = logging.getLogger(__name__)
 
 @gin.configurable
 class MultiLanguageClassifier(LightningModule):
+    """Lightning module that encapsulate all routines for multi-language text classification.
+
+    Maybe used as regular Torch module on inference: forward pass returns predicted languages.
+    Also support training via lightning Trainer, see: https://pytorch-lightning.readthedocs.io/en/stable/.
+
+    Use HuggingFace models as backbone to embed tokens, e.g. "bert-base-multilingual-cased":
+    https://huggingface.co/bert-base-multilingual-cased
+    Reports per-token cross-entropy loss and F1-score during training.
+    """
+
     def __init__(
         self, n_languages: int, embedder_name: str = "bert-base-multilingual-cased", *, freeze_embedder: bool = True
     ):
+        """Gin configurable constructor for multi-language classifier.
+
+        :param n_languages: number of languages to classify.
+        :param embedder_name: name of pretrained HuggingFace model to embed tokens.
+        :param freeze_embedder: if `True` then freeze backbone module and train only top classifier.
+        """
         super().__init__()
 
-        self._token_embedder = BertModel.from_pretrained(embedder_name)
+        self._token_embedder = AutoModel.from_pretrained(embedder_name)
         self._token_classifier = TokenClassifier(n_languages, self._token_embedder.config.hidden_size)
         self._n_langs = n_languages
 
@@ -40,8 +56,8 @@ class MultiLanguageClassifier(LightningModule):
         """Forward pass of multi-language classification model.
         Could be used during inference to classify each token in text.
 
-        :param tokenized_texts: [batch size; seq len] -- batch with pretokenized texts
-        :param attention_mask: [batch size; seq len] -- attention mask with 0 for padding tokens
+        :param tokenized_texts: [batch size; seq len] -- batch with pretokenized texts.
+        :param attention_mask: [batch size; seq len] -- attention mask with 0 for padding tokens.
         :return: [batch size; seq len] -- ids of predicted languages.
         """
         # [batch size; seq len; embed dim]
@@ -55,7 +71,16 @@ class MultiLanguageClassifier(LightningModule):
         return top_classes
 
     @gin.configurable
-    def configure_optimizers(self, optimizer_cls, scheduler_cls=None):
+    def configure_optimizers(self, optimizer_cls=gin.REQUIRED, scheduler_cls=None):
+        """Gin configurable method to define optimizers and learning rate scheduler.
+        Gin should define classes that would be initialized here.
+
+        Both optimizer and scheduler are also configured by gin.
+
+        :param optimizer_cls: PyTorch optimizer class, e.g. `torch.optim.AdamW`.
+        :param scheduler_cls: PyTorch scheduler class, e.g. `torch.optim.lr_scheduler.LambdaLR`.
+                                If `None`, then constant lr.
+        """
         parameters = chain(self._token_embedder.parameters(), self._token_classifier.parameters())
         optimizer = optimizer_cls(parameters)
         if scheduler_cls is None:
@@ -70,6 +95,16 @@ class MultiLanguageClassifier(LightningModule):
         }
 
     def shared_step(self, batch: Tuple[Tensor, ...], split: str) -> STEP_OUTPUT:
+        """Shared step of them that used during training and evaluation.
+        Make forward pass of the model, calculate loss and metric and log them.
+
+        :param batch: Tuple of
+            > input_ids [batch size; seq len] – input tokens ids padded to the same length;
+            > attention_mask [batch size; seq len] – mask with padding description, 0 means PAD token;
+            > labels [batch size; seq len] - labels of each token, `n_languages` used for special tokens.
+        :param split: name of current split, one of `train`, `val`, or `test`.
+        :return: loss on the current batch.
+        """
         input_ids, attention_mask, labels = batch
         bs, seq_len = labels.shape
 
