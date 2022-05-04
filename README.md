@@ -6,7 +6,9 @@
 [![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/Naereen/StrapDown.js/blob/master/LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/Naereen/StrapDown.js.svg?style=social&label=Star&maxAge=2592000)](https://github.com/SpirinEgor/gulag/stargazers)
 
-<img style="display: block; margin: 0 auto; width: 450px; height: 250px; object-fit: none; object-position: 60% 0;"  src="https://studfile.net/html/42535/100/html_xby5E88jcl.iKpm/htmlconvd-JIAk6X31x1.jpg" alt="cannon on sparrows"/>
+<p align="center">
+  <img src="https://i.ibb.co/Y81PByz/htmlconvd-JIAk6-X31x1.jpg" alt="cannon on sparrows"/>
+</p>
 
 Classify languages in text via neural networks.
 
@@ -47,7 +49,7 @@ Both modules have explicit documentation, see source files for usage details.
 
 Since extracting languages from a text is a kind of synthetic task, then there is no exact dataset of that.
 A possible approach to handle this is to use general multilingual corpses to create a synthetic dataset with multiple languages per one text.
-Although there is a popular mC4 dataset with large texts in over 100 languages.
+Although there is a popular [mC4](https://huggingface.co/datasets/mc4) dataset with large texts in over 100 languages.
 It is too large for this pet project.
 Therefore, I used [wikiann](https://huggingface.co/datasets/wikiann) dataset that also supports over 100 languages including
 Russian, Ukrainian, Belarusian, Kazakh, Azerbaijani, Armenian, Georgian, Hebrew, English, and German.
