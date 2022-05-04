@@ -109,8 +109,11 @@ In inference mode, you may play with the model to see whether it is good or not.
 This script requires a W&B run path where checkpoint is stored and checkpoint name.
 After that, you can interact with a model in a loop.
 
+The final model is stored in [voudy/gulag/a55dbee8](https://wandb.ai/voudy/gulag/runs/a55dbee8?workspace=user-voudy) run.
+It was trained for 20 000 steps for ~9 hours on Tesla T4.
+
 ```shell
-$ python -m src.main infer --wandb "voudy/gulag/1ykm0l2n" --ckpt "step_20000.ckpt.ckpt"
+$ python -m src.main infer --wandb "voudy/gulag/a55dbee8" --ckpt "step_20000.ckpt"
 ...
 Enter text to classify languages (Ctrl-C to exit):
 > İrəli! Вперёд! Nach vorne!
@@ -118,6 +121,8 @@ az -- İrəli
 ru -- Вперёд
 de -- Nach vorne
 Enter text to classify languages (Ctrl-C to exit):
+> Давайте жити дружно
+uk -- Давайте жити дружно
 > ...
 ```
 

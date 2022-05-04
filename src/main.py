@@ -24,8 +24,8 @@ def configure_arg_parser() -> ArgumentParser:
     parser_train.add_argument("--gin-param", action="append", help="Additional gin param to bind")
 
     parser_infer = subparsers.add_parser("infer", help="Run model inference.")
-    parser_infer.add_argument("--wandb", type=str, default="voudy/gulag/1ykm0l2n", help="W&B run path")
-    parser_infer.add_argument("--ckpt", type=str, default="step_20000.ckpt.ckpt", help="Checkpoint name")
+    parser_infer.add_argument("--wandb", type=str, default="voudy/gulag/a55dbee8", help="W&B run path")
+    parser_infer.add_argument("--ckpt", type=str, default="step_20000.ckpt", help="Checkpoint name")
 
     return argument_parser
 

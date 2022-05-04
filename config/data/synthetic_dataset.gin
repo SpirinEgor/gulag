@@ -3,8 +3,8 @@
 # ==============================================================================
 
 generate_example.min_langs = 1
-generate_example.max_langs = 5
-generate_example.max_samples_per_lang = 5
+generate_example.max_langs = 10
+generate_example.max_samples_per_lang = 10
 generate_example.max_seq_len = 512
 
 generate_eval_samples.n_samples = 10_000

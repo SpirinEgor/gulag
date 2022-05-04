@@ -8,7 +8,7 @@ include 'config/optimizer.gin'
 #                                  train
 # ==============================================================================
 
-train.n_steps = 10_000
+train.n_steps = 20_000
 train.accelerator = "gpu"
 train.eval_steps = 1_000
 train.gradient_clip = 1.0

@@ -11,9 +11,8 @@ MultiLanguageClassifier.freeze_embedder = True
 #                                 Token Classifier
 # ==============================================================================
 
-TokenClassifier.hidden_dims = (512, 512)
+TokenClassifier.hidden_dims = (1024, 1024)
 TokenClassifier.activation_cls = @ReLU
 TokenClassifier.dropout_rate = 0.2
 
 ReLU.inplace = True
-
